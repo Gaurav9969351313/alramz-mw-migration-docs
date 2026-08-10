@@ -230,7 +230,8 @@ Return 200 / OK
                 ELSE 0
             END AS TRADING_NUMBER_EXISTS
         FROM DUAL;
-   ```
+    ```
+
 ---
 
 ??? "eTradeFIT.v2.services.InternalOnboarding:IfEmailExists"
