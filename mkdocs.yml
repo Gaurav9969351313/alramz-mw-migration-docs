@@ -43,11 +43,11 @@ nav:
   - Home: index.md
   - ADRs:
     - ADR/index.md
-    - ADR-1: Secret Management: ADR/ADR_1_Secret_Management.md
+    - 'ADR-1: Secret Management': ADR/ADR_1_Secret_Management.md
   - Drafts:
     - drafts/index.md
-    - DFM Onboarding - SRS: drafts/draft_onboarding.md
-    - validateIBAN - SRS: drafts/draft_validateIban.md
+    - 'DFM Onboarding - SRS': drafts/draft_onboarding.md
+    - 'validateIBAN - SRS': drafts/draft_validateIban.md
 
 plugins:
   - search
