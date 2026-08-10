@@ -10,8 +10,8 @@ This section contains draft documents, Software Requirements Specifications (SRS
 
 ## Documents
 
-- [DFM Onboarding - SRS](/drafts/draft_onboarding.html)
-- [validateIBAN - SRS](/drafts/draft_validateIban.html)
+- [DFM Onboarding - SRS]({{ '/drafts/draft_onboarding.html' | relative_url }})
+- [validateIBAN - SRS]({{ '/drafts/draft_validateIban.html' | relative_url }})
 
 ## Notes
 

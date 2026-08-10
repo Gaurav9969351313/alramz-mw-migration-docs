@@ -1,3 +1,9 @@
+---
+layout: default
+title: DFM Onboarding - SRS
+permalink: /drafts/draft_onboarding.html
+---
+
 # DFM Onboarding - Software Requirements Specification (SRS)
 
 ## Document Metadata

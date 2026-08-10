@@ -1,6 +1,7 @@
 ---
 layout: home
 title: Software AG to Spring Boot Migration Documentation
+permalink: /
 ---
 
 # Software AG to Spring Boot Migration Documentation
@@ -11,7 +12,7 @@ This repository contains architecture decision records, software requirements sp
 
 ## Contents
 
-- **[ADRs]({{ '/ADR/' | relative_url }})** — Architecture Decision Records documenting key design choices
+- **[ADRs]({{ '/adr/' | relative_url }})** — Architecture Decision Records documenting key design choices
 - **[Drafts]({{ '/drafts/' | relative_url }})** — Software Requirements Specifications (SRS) and draft specifications
 
 ## Getting Started

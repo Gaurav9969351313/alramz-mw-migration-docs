@@ -10,7 +10,7 @@ This section contains Architecture Decision Records (ADRs) that document signifi
 
 ## Records
 
-- [ADR-1: Secret Management](/adr/ADR_1_Secret_Management.html)
+- [ADR-1: Secret Management]({{ '/adr/ADR_1_Secret_Management.html' | relative_url }})
 
 ## What is an ADR?
 
