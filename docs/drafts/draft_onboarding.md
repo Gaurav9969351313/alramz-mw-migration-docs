@@ -44,7 +44,7 @@ The service processes an online customer onboarding request for DFM-related onbo
 | **FR-023** | Correlation    | External calls               | Downstream processing                                                   | Pass the generated correlation ID to duplicate checks and persistence operations where supported by the integration.                        | End-to-end request traceability.                                                                                      |
 
 ## Overall Request Validation Workflow
-
+```text
 Receive onboarding request
         |
         v
@@ -91,7 +91,7 @@ Invoke DFM onboarding persistence
         |
         v
 Return 200 / OK
-
+```
 ## Duplicate checks
 
 | Field      | Duplicate operation         |
