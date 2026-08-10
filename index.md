@@ -1,6 +1,6 @@
 ---
 layout: home
-title: Integration Documentation
+title: Home
 permalink: /
 ---
 

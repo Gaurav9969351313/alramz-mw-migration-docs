@@ -2,7 +2,6 @@ title: Integration Documentation
 description: Software AG to Spring Boot Migration Documentation
 url: ""
 baseurl: ""
-repository: alramz/mw-migration-docs
 
 markdown: kramdown
 kramdown:
