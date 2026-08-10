@@ -204,9 +204,9 @@ Return 200 / OK
 ---
 
 ??? "FITIntegrations.adapters:ifNINOrTradingNumberExist"
-   ### Oracle SQL Query 
+    ## Oracle SQL Logic to check for ifNINOrTradingNumberExist
 
-   ```sql
+    ```sql
     SELECT
         CASE
             WHEN EXISTS (
