@@ -1,17 +1,18 @@
 ---
 layout: home
-title: Home
-permalink: /
+title: Software AG to Spring Boot Migration Documentation
 ---
 
 # Software AG to Spring Boot Migration Documentation
 
-Welcome to the **Al Ramz Middleware Migration Documentation** site. This repository contains architecture decision records, software requirements specifications, and migration guidance for moving integration services from Software AG webMethods to Spring Boot.
+Welcome to the **Al Ramz Middleware Migration Documentation** site.
+
+This repository contains architecture decision records, software requirements specifications, and migration guidance for moving integration services from Software AG webMethods to Spring Boot.
 
 ## Contents
 
-- **[ADRs](/adr/)** — Architecture Decision Records documenting key design choices
-- **[Drafts](/drafts/)** — Software Requirements Specifications (SRS) and draft specifications
+- **[ADRs]({{ '/ADR/' | relative_url }})** — Architecture Decision Records documenting key design choices
+- **[Drafts]({{ '/drafts/' | relative_url }})** — Software Requirements Specifications (SRS) and draft specifications
 
 ## Getting Started
 
@@ -22,7 +23,7 @@ Welcome to the **Al Ramz Middleware Migration Documentation** site. This reposit
 ## Repository Structure
 
 | Path | Description |
-|------|-------------|
+|---|---|
 | `ADR/` | Architecture Decision Records |
 | `drafts/` | Draft service specifications and SRS documents |
 | `index.md` | This landing page |

@@ -1,8 +1,10 @@
 title: Integration Documentation
 description: Software AG to Spring Boot Migration Documentation
-url: "https://Gaurav9969351313.github.io"
-baseurl: "/alramz-mw-migration-docs"
+url: ""
+baseurl: "https://Gaurav9969351313.github.io/alramz-mw-migration-docs"
+
 markdown: kramdown
+
 kramdown:
   input: GFM
   auto_ids: true
