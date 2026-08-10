@@ -1,0 +1,22 @@
+title: Integration Documentation
+description: Software AG to Spring Boot Migration Documentation
+url: ""
+baseurl: ""
+repository: alramz/mw-migration-docs
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  auto_ids: true
+  entity_output: as_char
+  toc_levels: 1..6
+  syntax_highlighter: rouge
+
+theme: minima
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+header_pages:
+  - drafts/index.md
+  - ADR/index.md
