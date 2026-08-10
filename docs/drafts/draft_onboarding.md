@@ -111,262 +111,258 @@ Return 200 / OK
 | **INT-004**    | `eTradeFIT.v2.services.InternalOnboarding:IfPassportExists` | Check whether the supplied passport number already exists.              | `ppNumber ← pp_no`<br>`correlationID ← generated GUID`                     | `exists → ppExists`    | Duplicate status determined successfully. | If service is unavailable, return technical error and stop processing.                 |
 | **INT-005**    | `DFMIntegrations.v2.adapters:insertDFMOnboardingRequest`    | Persist the validated onboarding request into DFM onboarding system.    | Complete onboarding request payload.<br>`ACCOUNT_STATUS = NEW`             | `insertionResult`      | Persistence successful.                   | Return `400 + lastError` or `500 + Internal Server Error` depending on exception path. |
 
-<details>
-<summary>eTradeFIT.v2.services.InternalOnboarding:IfEIDExists</summary>
+??? "eTradeFIT.v2.services.InternalOnboarding:IfEIDExists"
 
-## Validation Rules  
-
-| Rule ID | Rule Description |
-|---------|------------------|
-| **V‑001** | `referenceNo` must match regex `^[A-Za-z0-9]{1,36}$`. |
-| **V‑002** | `eidNumber` must match regex `^[A-Za-z0-9]{1,20}$`. |
-| **V‑003** | `lang` must be a valid ISO‑639‑1 language code (if present). |
-| **V‑004** | `islamicMode` must be either `"true"` or `"false"` (case‑insensitive). |
-
-## Integration API (External Service)  
-
-| Attribute | Detail |
-|-----------|--------|
-| **Purpose** | Provides a binary "EID exists?" check. Returns a JSON payload indicating success/failure and optional token. |
-| **HTTP Method** | **POST** (as inferred from the flow's request construction). |
-| **Endpoint** | `<baseURL>/IntegrationAPI/IntegrationWServices/IfEIDExists` |
-| **Authentication** | Bearer token taken from inbound request's `Authorization` header; forwarded to the external API as `Authorization: Bearer <accessToken>`. |
-| **Headers** | <ul><li>`Content-Type: application/json`</li><li>`Authorization: Bearer <accessToken>`</li></ul> |
-| **Request Body** | JSON containing at least `eidNumber` (and optionally `islamicMode`, `lang`). |
-
-## Sample External Request  
-
-```http
-POST https://api.external.com/IntegrationAPI/IntegrationWServices/IfEIDExists
-Authorization: Bearer abc123xyz
-Content-Type: application/json
-
-{
-  "referenceNo": "REQ-20251103-001",
-  "eidNumber": "E1234567890",
-  "islamicMode": "false",
-  "lang": "en"
-}
-```
-
----
-
-## Sample External Response  
-
-```json
-{
-  "status": "SUCCESS",
-  "referenceNo": "REQ-20251103-001",
-  "newToken": "TKN-987654321",
-  "resData": {
-    "eidVerified": true,
-    "verificationDate": "2025-11-03T10:15:00Z"
-  }
-}
-```
-
-*If the external service reports failure:*
-
-```json
-{
-  "status": "FAILURE",
-  "referenceNo": "REQ-20251103-001",
-  "errorCode": "E1001",
-  "resData": {}
-}
-```
-
-
-| Error Code | Message | Primary Cause | Propagated To Caller? |
-|------------|---------|---------------|-----------------------|
-| **99** | Generic technical failure | Timeout, parsing error, missing required field, unexpected exception | Yes – returned as `errorCode = 99` with `error` description. |
-| **E1001** | "Invalid EID format" | `eidNumber` fails validation | Yes – forwarded as `errorCode`. |
-| **E1002** | "Missing access token" | `accessToken` header absent or empty | Yes – returned as `errorCode`. |
-| **E1003** | "External service unavailable" | External HTTP returns 5xx or timeout | Yes – returned as `errorCode = 99` with message "External service unavailable". |
-| **E1004** | "Business validation failed" | External API returns `status = FAILURE` with known `errorCode` | Yes – `errorCode` value from external response is returned. |
-| **E1005** | "Invalid request payload" | Request JSON malformed or missing mandatory fields | Yes – returns `errorCode = 99`. |
-| **E1006** | "Logging failure" | Inability to write audit logs | **Non‑fatal** – flow continues; warning logged internally. |
-
-## REST API Design for Spring Boot
-
-| Aspect | Detail |
-|--------|--------|
-| **HTTP Method** | `POST` |
-| **Endpoint** | `/api/v1/eid/validate` |
-| **Request JSON** | See *Sample External Request* (payload fields must match the service's input DTO). |
-| **Success Response (200 OK)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "0", "newToken": "TKN-987654321", "status": "Success", "resData": { "eidVerified": true, "verificationDate": "2025-11-03T10:15:00Z" } } ``` |
-| **Failure Response (400 Bad Request)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "E1001", "status": "Error", "resData": {} } ``` |
-| **Failure Response (502 Bad Gateway)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "99", "status": "Error", "resData": {}, "error": "External service unavailable" } ``` |
-| **Validation Errors (422 Unprocessable Entity)** | Return a map of field → error message for any failed input validation. |
-
-</details>
-
----
-
-<details>
-<summary>eTradeFIT.v2.services.InternalOnboarding:IfEmailExists</summary>
-
-
-## Validation Rules  
-
-| Rule ID | Rule Description |
-|---------|------------------|
-| **VR‑001** | `emailAddress` must not be `null` or empty; must match a simple e‑mail regex (`^[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}$`). |
-| **VR‑002** | `accessToken` must be supplied in the HTTP header and must be a non‑blank string. |
-| **VR‑003** | `lang` (if present) must be a two‑letter ISO language code; otherwise default to `EN`. |
-| **VR‑004** | `islamicMode` (if present) must be `"0"` or `"1"`; any other value is treated as invalid request. |
-| **VR‑005** | All required fields must pass a length check (`emailAddress ≤ 256`, `referenceNo ≤ 64`). |
-| **VR‑006** | The constructed outbound JSON must be syntactically valid; otherwise the request is rejected with error code `1028`. |
-| **VR‑007** | If the external service returns an HTTP status ≥ 400, the pipeline interprets it as a failure and maps the `errorCode` accordingly. |
-| **VR‑008** | The `pk_id` generated for persistence must be a positive numeric value; otherwise an internal error is raised. |
-
-## Sample External Request  
-
-ETRADE_BASE_URL = https://etradeqa.alramz.ae
-
-```json
-POST {{ETRADE_BASE_URL}}/IntegrationAPI/IntegrationWServices/IfEmailExists HTTP/1.1
-Host: api.example.com
-access-token: abc123def456
-Content-Type: application/json
-Accept: application/json
-
-{
-  "referenceNo": "REQ20251103-001",
-  "accessToken": "abc123def456",
-  "emailAddress": "john.doe@example.com",
-  "lang": "EN",
-  "islamicMode": "0"
-}
-
-```
-
-## Sample External Response
-```json
-{
-  "errorCode": "0",
-  "responseCode": "200",
-  "responseMessage": "OK",
-  "newToken": "newAbc123Token",
-  "pk_id": "1234567890",
-  "resData": {
-    "validationStatus": "EXISTS",
-    "verifiedAt": "2025-11-03T12:34:56Z"
-  }
-}
-```
-
-*If the external service reports an invalid token:*
-
-```json
-{
-  "errorCode": "99",
-  "responseCode": "1008",
-  "responseMessage": "Invalid Token"
-}
-```
-
-## REST API Design for Spring Boot  
-
-| Element | Specification |
-|---------|----------------|
-| **HTTP Method** | `POST` |
-| **Endpoint** | `/api/v1/email/validate` |
-| **Request Content‑Type** | `application/json` |
-| **Success Response** | `200 OK` |
-| **Failure Responses** | - `400 Bad Request` – `Invalid Request Parameters`.<br>- `401 Unauthorized` – `Invalid Token`.<br>- `503 Service Unavailable` – `Backend Service Unavailable`.<br>- `500 Internal Server Error` – generic failure. |
-| **Validation Errors** | Return a JSON object containing `validationError` fields (e.g., `field: "emailAddress", message: "must not be empty"`). |
-| **Example Successful Request** | ```json { "emailAddress": "john.doe@example.com", "lang": "EN", "islamicMode": "0" }``` |
-| **Example Successful Response** | ```json { "responseCode": "200", "responseMessage": "OK", "referenceNo": "REQ20251103-001", "newToken": "newAbc123Token", "pk_id": "1234567890", "resData": { "validationStatus": "EXISTS" } }```
-
-
-</details>
+    ## Validation Rules  
+    
+    | Rule ID | Rule Description |
+    |---------|------------------|
+    | **V‑001** | `referenceNo` must match regex `^[A-Za-z0-9]{1,36}$`. |
+    | **V‑002** | `eidNumber` must match regex `^[A-Za-z0-9]{1,20}$`. |
+    | **V‑003** | `lang` must be a valid ISO‑639‑1 language code (if present). |
+    | **V‑004** | `islamicMode` must be either `"true"` or `"false"` (case‑insensitive). |
+    
+    ## Integration API (External Service)  
+    
+    | Attribute | Detail |
+    |-----------|--------|
+    | **Purpose** | Provides a binary "EID exists?" check. Returns a JSON payload indicating success/failure and optional token. |
+    | **HTTP Method** | **POST** (as inferred from the flow's request construction). |
+    | **Endpoint** | `<baseURL>/IntegrationAPI/IntegrationWServices/IfEIDExists` |
+    | **Authentication** | Bearer token taken from inbound request's `Authorization` header; forwarded to the external API as `Authorization: Bearer <accessToken>`. |
+    | **Headers** | <ul><li>`Content-Type: application/json`</li><li>`Authorization: Bearer <accessToken>`</li></ul> |
+    | **Request Body** | JSON containing at least `eidNumber` (and optionally `islamicMode`, `lang`). |
+    
+    ## Sample External Request  
+    
+    ```http
+    POST https://api.external.com/IntegrationAPI/IntegrationWServices/IfEIDExists
+    Authorization: Bearer abc123xyz
+    Content-Type: application/json
+    
+    {
+      "referenceNo": "REQ-20251103-001",
+      "eidNumber": "E1234567890",
+      "islamicMode": "false",
+      "lang": "en"
+    }
+    ```
+    
+    ---
+    
+    ## Sample External Response  
+    
+    ```json
+    {
+      "status": "SUCCESS",
+      "referenceNo": "REQ-20251103-001",
+      "newToken": "TKN-987654321",
+      "resData": {
+        "eidVerified": true,
+        "verificationDate": "2025-11-03T10:15:00Z"
+      }
+    }
+    ```
+    
+    *If the external service reports failure:*
+    
+    ```json
+    {
+      "status": "FAILURE",
+      "referenceNo": "REQ-20251103-001",
+      "errorCode": "E1001",
+      "resData": {}
+    }
+    ```
+    
+    
+    | Error Code | Message | Primary Cause | Propagated To Caller? |
+    |------------|---------|---------------|-----------------------|
+    | **99** | Generic technical failure | Timeout, parsing error, missing required field, unexpected exception | Yes – returned as `errorCode = 99` with `error` description. |
+    | **E1001** | "Invalid EID format" | `eidNumber` fails validation | Yes – forwarded as `errorCode`. |
+    | **E1002** | "Missing access token" | `accessToken` header absent or empty | Yes – returned as `errorCode`. |
+    | **E1003** | "External service unavailable" | External HTTP returns 5xx or timeout | Yes – returned as `errorCode = 99` with message "External service unavailable". |
+    | **E1004** | "Business validation failed" | External API returns `status = FAILURE` with known `errorCode` | Yes – `errorCode` value from external response is returned. |
+    | **E1005** | "Invalid request payload" | Request JSON malformed or missing mandatory fields | Yes – returns `errorCode = 99`. |
+    | **E1006** | "Logging failure" | Inability to write audit logs | **Non‑fatal** – flow continues; warning logged internally. |
+    
+    ## REST API Design for Spring Boot
+    
+    | Aspect | Detail |
+    |--------|--------|
+    | **HTTP Method** | `POST` |
+    | **Endpoint** | `/api/v1/eid/validate` |
+    | **Request JSON** | See *Sample External Request* (payload fields must match the service's input DTO). |
+    | **Success Response (200 OK)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "0", "newToken": "TKN-987654321", "status": "Success", "resData": { "eidVerified": true, "verificationDate": "2025-11-03T10:15:00Z" } } ``` |
+    | **Failure Response (400 Bad Request)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "E1001", "status": "Error", "resData": {} } ``` |
+    | **Failure Response (502 Bad Gateway)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "99", "status": "Error", "resData": {}, "error": "External service unavailable" } ``` |
+    | **Validation Errors (422 Unprocessable Entity)** | Return a map of field → error message for any failed input validation. |
+    
+    
 
 ---
 
-<details>
-<summary>eTradeFIT.v2.services.InternalOnboarding:IfPassportExists</summary>
+??? "eTradeFIT.v2.services.InternalOnboarding:IfEmailExists"
 
-## Validation Rules
-
-| Field | Type (inferred) | Required | Validation / Rules | Description |
-|-------|-----------------|----------|--------------------|-------------|
-| `referenceNo` | **String** | Yes | Non‑empty; must match regex `[A-Z0-9]{8}` (assumed) | Identifier of the passport to verify. |
-| `accessToken` | **String** | Yes | Non‑empty; must be a valid bearer token format | Authentication token for the external API. |
-| `islamicMode` | **String** | No | – | Mode flag (e.g., `true`/`false`). |
-| `lang` | **String** | No | – | Language preference. |
-| `ppNumber` | **String** | No | – | Passport number (optional). 
-
-
-
-## Sample External Request  
-
-```json
-POST /IntegrationAPI/IntegrationWServices/IfPassportExists HTTP/1.1
-Host: etrade-base.example.com
-Content-Type: application/json
-Authorization: Bearer <accessToken>
-
-{
-  "referenceNo": "AB123456",
-  "accessToken": "<accessToken>",
-  "islamicMode": "false",
-  "lang": "en",
-  "ppNumber": "12345"
-}
-```
-
-*Only fields present in the incoming pipeline are transmitted.*
+    ## Validation Rules  
+    
+    | Rule ID | Rule Description |
+    |---------|------------------|
+    | **VR‑001** | `emailAddress` must not be `null` or empty; must match a simple e‑mail regex (`^[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}$`). |
+    | **VR‑002** | `accessToken` must be supplied in the HTTP header and must be a non‑blank string. |
+    | **VR‑003** | `lang` (if present) must be a two‑letter ISO language code; otherwise default to `EN`. |
+    | **VR‑004** | `islamicMode` (if present) must be `"0"` or `"1"`; any other value is treated as invalid request. |
+    | **VR‑005** | All required fields must pass a length check (`emailAddress ≤ 256`, `referenceNo ≤ 64`). |
+    | **VR‑006** | The constructed outbound JSON must be syntactically valid; otherwise the request is rejected with error code `1028`. |
+    | **VR‑007** | If the external service returns an HTTP status ≥ 400, the pipeline interprets it as a failure and maps the `errorCode` accordingly. |
+    | **VR‑008** | The `pk_id` generated for persistence must be a positive numeric value; otherwise an internal error is raised. |
+    
+    ## Sample External Request  
+    
+    ETRADE_BASE_URL = https://etradeqa.alramz.ae
+    
+    ```json
+    POST {{ETRADE_BASE_URL}}/IntegrationAPI/IntegrationWServices/IfEmailExists HTTP/1.1
+    Host: api.example.com
+    access-token: abc123def456
+    Content-Type: application/json
+    Accept: application/json
+    
+    {
+      "referenceNo": "REQ20251103-001",
+      "accessToken": "abc123def456",
+      "emailAddress": "john.doe@example.com",
+      "lang": "EN",
+      "islamicMode": "0"
+    }
+    
+    ```
+    
+    ## Sample External Response
+    ```json
+    {
+      "errorCode": "0",
+      "responseCode": "200",
+      "responseMessage": "OK",
+      "newToken": "newAbc123Token",
+      "pk_id": "1234567890",
+      "resData": {
+        "validationStatus": "EXISTS",
+        "verifiedAt": "2025-11-03T12:34:56Z"
+      }
+    }
+    ```
+    
+    *If the external service reports an invalid token:*
+    
+    ```json
+    {
+      "errorCode": "99",
+      "responseCode": "1008",
+      "responseMessage": "Invalid Token"
+    }
+    ```
+    
+    ## REST API Design for Spring Boot  
+    
+    | Element | Specification |
+    |---------|----------------|
+    | **HTTP Method** | `POST` |
+    | **Endpoint** | `/api/v1/email/validate` |
+    | **Request Content‑Type** | `application/json` |
+    | **Success Response** | `200 OK` |
+    | **Failure Responses** | - `400 Bad Request` – `Invalid Request Parameters`.<br>- `401 Unauthorized` – `Invalid Token`.<br>- `503 Service Unavailable` – `Backend Service Unavailable`.<br>- `500 Internal Server Error` – generic failure. |
+    | **Validation Errors** | Return a JSON object containing `validationError` fields (e.g., `field: "emailAddress", message: "must not be empty"`). |
+    | **Example Successful Request** | ```json { "emailAddress": "john.doe@example.com", "lang": "EN", "islamicMode": "0" }``` |
+    | **Example Successful Response** | ```json { "responseCode": "200", "responseMessage": "OK", "referenceNo": "REQ20251103-001", "newToken": "newAbc123Token", "pk_id": "1234567890", "resData": { "validationStatus": "EXISTS" } }```
+    
+    
+    
 
 ---
 
-## Sample External Response  
+??? "eTradeFIT.v2.services.InternalOnboarding:IfPassportExists"
 
-### Successful (200)
-
-```json
-{
-  "status": "Success",
-  "newToken": "X9Y8Z7",
-  "pk_id": "1000001234",
-  "resData": {
-    "passportNumber": "AB123456",
-    "expiryDate": "2028-12-31",
-    "nationality": "US"
-  },
-  "errorCode": "0"
-}
-```
-
-### Failure (e.g., 404)
-
-```json
-{
-  "status": "Error",
-  "newToken": "",
-  "pk_id": "",
-  "resData": {},
-  "errorCode": "99"
-}
-```
-
-
-## REST API Design for Spring Boot  
-
-| Element | Value |
-|---------|-------|
-| **HTTP Method** | `POST` |
-| **Endpoint** | `/api/v1/passport/verify` |
-| **Request JSON** | See **Sample External Request** (fields `referenceNo`, `accessToken`, `islamicMode`, `lang`, `ppNumber`). |
-| **Success Response (200)** | ```json { "status": "Success", "referenceNo": "AB123456", "newToken": "X9Y8Z7", "pk_id": "1000001234", "resData": { … }, "errorCode": "0" } ``` |
-| **Failure Response (200 with error payload)** | ```json { "status": "Error", "referenceNo": "AB123456", "newToken": "", "pk_id": "", "resData": { "errorDetails": "message" }, "errorCode": "99" } ``` |
-| **Validation Errors (400)** | Return a JSON map of field → error message (e.g., `{ "referenceNo": "must not be empty" }`). |
-| **HTTP Status Codes** | `200` – always returned (business status encoded inside payload).<br>`400` – when client‑side validation fails.<br>`500` – should never be used; all errors are wrapped in payload with `status=Error`. |
-| **Content-Type** | `application/json` |
-| **Authentication** | Bearer token (`Authorization: Bearer <token>`) – validated by a Spring Security filter before reaching the controller. 
-
-
-</details>
+    ## Validation Rules
+    
+    | Field | Type (inferred) | Required | Validation / Rules | Description |
+    |-------|-----------------|----------|--------------------|-------------|
+    | `referenceNo` | **String** | Yes | Non‑empty; must match regex `[A-Z0-9]{8}` (assumed) | Identifier of the passport to verify. |
+    | `accessToken` | **String** | Yes | Non‑empty; must be a valid bearer token format | Authentication token for the external API. |
+    | `islamicMode` | **String** | No | – | Mode flag (e.g., `true`/`false`). |
+    | `lang` | **String** | No | – | Language preference. |
+    | `ppNumber` | **String** | No | – | Passport number (optional). 
+    
+    
+    
+    ## Sample External Request  
+    
+    ```json
+    POST /IntegrationAPI/IntegrationWServices/IfPassportExists HTTP/1.1
+    Host: etrade-base.example.com
+    Content-Type: application/json
+    Authorization: Bearer <accessToken>
+    
+    {
+      "referenceNo": "AB123456",
+      "accessToken": "<accessToken>",
+      "islamicMode": "false",
+      "lang": "en",
+      "ppNumber": "12345"
+    }
+    ```
+    
+    *Only fields present in the incoming pipeline are transmitted.*
+    
+    ---
+    
+    ## Sample External Response  
+    
+    ### Successful (200)
+    
+    ```json
+    {
+      "status": "Success",
+      "newToken": "X9Y8Z7",
+      "pk_id": "1000001234",
+      "resData": {
+        "passportNumber": "AB123456",
+        "expiryDate": "2028-12-31",
+        "nationality": "US"
+      },
+      "errorCode": "0"
+    }
+    ```
+    
+    ### Failure (e.g., 404)
+    
+    ```json
+    {
+      "status": "Error",
+      "newToken": "",
+      "pk_id": "",
+      "resData": {},
+      "errorCode": "99"
+    }
+    ```
+    
+    
+    ## REST API Design for Spring Boot  
+    
+    | Element | Value |
+    |---------|-------|
+    | **HTTP Method** | `POST` |
+    | **Endpoint** | `/api/v1/passport/verify` |
+    | **Request JSON** | See **Sample External Request** (fields `referenceNo`, `accessToken`, `islamicMode`, `lang`, `ppNumber`). |
+    | **Success Response (200)** | ```json { "status": "Success", "referenceNo": "AB123456", "newToken": "X9Y8Z7", "pk_id": "1000001234", "resData": { … }, "errorCode": "0" } ``` |
+    | **Failure Response (200 with error payload)** | ```json { "status": "Error", "referenceNo": "AB123456", "newToken": "", "pk_id": "", "resData": { "errorDetails": "message" }, "errorCode": "99" } ``` |
+    | **Validation Errors (400)** | Return a JSON map of field → error message (e.g., `{ "referenceNo": "must not be empty" }`). |
+    | **HTTP Status Codes** | `200` – always returned (business status encoded inside payload).<br>`400` – when client‑side validation fails.<br>`500` – should never be used; all errors are wrapped in payload with `status=Error`. |
+    | **Content-Type** | `application/json` |
+    | **Authentication** | Bearer token (`Authorization: Bearer <token>`) – validated by a Spring Security filter before reaching the controller. 
+    
+    
+    
 
 ---
 
