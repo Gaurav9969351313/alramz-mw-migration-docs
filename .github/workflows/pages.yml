@@ -22,19 +22,27 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v4
 
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          source: ./
-          destination: ./_site
+          python-version: "3.x"
+          cache: "pip"
 
-      - name: Upload Pages Artifact
+      - name: Install dependencies
+        run: pip install mkdocs-material
+
+      - name: Build with MkDocs
+        run: mkdocs build --site-dir ./_site
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./_site
 
   deploy:
     runs-on: ubuntu-latest

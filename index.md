@@ -1,9 +1,3 @@
----
-layout: home
-title: Software AG to Spring Boot Migration Documentation
-permalink: /
----
-
 # Software AG to Spring Boot Migration Documentation
 
 Welcome to the **Al Ramz Middleware Migration Documentation** site.
@@ -12,8 +6,8 @@ This repository contains architecture decision records, software requirements sp
 
 ## Contents
 
-- **[ADRs]({{ '/adr/' | relative_url }})** — Architecture Decision Records documenting key design choices
-- **[Drafts]({{ '/drafts/' | relative_url }})** — Software Requirements Specifications (SRS) and draft specifications
+- **[ADRs](ADR/index.md)** — Architecture Decision Records documenting key design choices
+- **[Drafts](drafts/index.md)** — Software Requirements Specifications (SRS) and draft specifications
 
 ## Getting Started
 
@@ -24,11 +18,11 @@ This repository contains architecture decision records, software requirements sp
 ## Repository Structure
 
 | Path | Description |
-|---|---|
+|------|-------------|
 | `ADR/` | Architecture Decision Records |
 | `drafts/` | Draft service specifications and SRS documents |
 | `index.md` | This landing page |
 
 ## Build & Deployment
 
-This site is built with **Jekyll** and deployed automatically to **GitHub Pages** via GitHub Actions on every push to `main`.
+This site is built with **MkDocs** and deployed automatically to **GitHub Pages** via GitHub Actions on every push to `main`.

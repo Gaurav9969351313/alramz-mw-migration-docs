@@ -1,9 +1,3 @@
----
-layout: default
-title: DFM Onboarding - SRS
-permalink: /drafts/draft_onboarding.html
----
-
 # DFM Onboarding - Software Requirements Specification (SRS)
 
 ## Document Metadata
@@ -133,10 +127,10 @@ Return 200 / OK
 
 | Attribute | Detail |
 |-----------|--------|
-| **Purpose** | Provides a binary “EID exists?” check. Returns a JSON payload indicating success/failure and optional token. |
-| **HTTP Method** | **POST** (as inferred from the flow’s request construction). |
+| **Purpose** | Provides a binary "EID exists?" check. Returns a JSON payload indicating success/failure and optional token. |
+| **HTTP Method** | **POST** (as inferred from the flow's request construction). |
 | **Endpoint** | `<baseURL>/IntegrationAPI/IntegrationWServices/IfEIDExists` |
-| **Authentication** | Bearer token taken from inbound request’s `Authorization` header; forwarded to the external API as `Authorization: Bearer <accessToken>`. |
+| **Authentication** | Bearer token taken from inbound request's `Authorization` header; forwarded to the external API as `Authorization: Bearer <accessToken>`. |
 | **Headers** | <ul><li>`Content-Type: application/json`</li><li>`Authorization: Bearer <accessToken>`</li></ul> |
 | **Request Body** | JSON containing at least `eidNumber` (and optionally `islamicMode`, `lang`). |
 
@@ -148,7 +142,7 @@ Authorization: Bearer abc123xyz
 Content-Type: application/json
 
 {
-  "referenceNo": "REQ-20251103-001", ???
+  "referenceNo": "REQ-20251103-001",
   "eidNumber": "E1234567890",
   "islamicMode": "false",
   "lang": "en"
@@ -163,7 +157,7 @@ Content-Type: application/json
 {
   "status": "SUCCESS",
   "referenceNo": "REQ-20251103-001",
-  "newToken": "TKN-987654321",        ???
+  "newToken": "TKN-987654321",
   "resData": {
     "eidVerified": true,
     "verificationDate": "2025-11-03T10:15:00Z"
@@ -186,12 +180,12 @@ Content-Type: application/json
 | Error Code | Message | Primary Cause | Propagated To Caller? |
 |------------|---------|---------------|-----------------------|
 | **99** | Generic technical failure | Timeout, parsing error, missing required field, unexpected exception | Yes – returned as `errorCode = 99` with `error` description. |
-| **E1001** | “Invalid EID format” | `eidNumber` fails validation | Yes – forwarded as `errorCode`. |
-| **E1002** | “Missing access token” | `accessToken` header absent or empty | Yes – returned as `errorCode`. |
-| **E1003** | “External service unavailable” | External HTTP returns 5xx or timeout | Yes – returned as `errorCode = 99` with message “External service unavailable”. |
-| **E1004** | “Business validation failed” | External API returns `status = FAILURE` with known `errorCode` | Yes – `errorCode` value from external response is returned. |
-| **E1005** | “Invalid request payload” | Request JSON malformed or missing mandatory fields | Yes – returns `errorCode = 99`. |
-| **E1006** | “Logging failure” | Inability to write audit logs | **Non‑fatal** – flow continues; warning logged internally. |
+| **E1001** | "Invalid EID format" | `eidNumber` fails validation | Yes – forwarded as `errorCode`. |
+| **E1002** | "Missing access token" | `accessToken` header absent or empty | Yes – returned as `errorCode`. |
+| **E1003** | "External service unavailable" | External HTTP returns 5xx or timeout | Yes – returned as `errorCode = 99` with message "External service unavailable". |
+| **E1004** | "Business validation failed" | External API returns `status = FAILURE` with known `errorCode` | Yes – `errorCode` value from external response is returned. |
+| **E1005** | "Invalid request payload" | Request JSON malformed or missing mandatory fields | Yes – returns `errorCode = 99`. |
+| **E1006** | "Logging failure" | Inability to write audit logs | **Non‑fatal** – flow continues; warning logged internally. |
 
 ## REST API Design for Spring Boot
 
@@ -199,7 +193,7 @@ Content-Type: application/json
 |--------|--------|
 | **HTTP Method** | `POST` |
 | **Endpoint** | `/api/v1/eid/validate` |
-| **Request JSON** | See *Sample External Request* (payload fields must match the service’s input DTO). |
+| **Request JSON** | See *Sample External Request* (payload fields must match the service's input DTO). |
 | **Success Response (200 OK)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "0", "newToken": "TKN-987654321", "status": "Success", "resData": { "eidVerified": true, "verificationDate": "2025-11-03T10:15:00Z" } } ``` |
 | **Failure Response (400 Bad Request)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "E1001", "status": "Error", "resData": {} } ``` |
 | **Failure Response (502 Bad Gateway)** | ```json { "referenceNo": "REQ-20251103-001", "errorCode": "99", "status": "Error", "resData": {}, "error": "External service unavailable" } ``` |
@@ -217,7 +211,7 @@ Content-Type: application/json
 
 | Rule ID | Rule Description |
 |---------|------------------|
-| **VR‑001** | `emailAddress` must not be `null` or empty; must match a simple e‑mail regex (`^[\\w.%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$`). |
+| **VR‑001** | `emailAddress` must not be `null` or empty; must match a simple e‑mail regex (`^[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}$`). |
 | **VR‑002** | `accessToken` must be supplied in the HTTP header and must be a non‑blank string. |
 | **VR‑003** | `lang` (if present) must be a two‑letter ISO language code; otherwise default to `EN`. |
 | **VR‑004** | `islamicMode` (if present) must be `"0"` or `"1"`; any other value is treated as invalid request. |
@@ -233,13 +227,13 @@ ETRADE_BASE_URL = https://etradeqa.alramz.ae
 ```json
 POST {{ETRADE_BASE_URL}}/IntegrationAPI/IntegrationWServices/IfEmailExists HTTP/1.1
 Host: api.example.com
-access-token: abc123def456 ???
+access-token: abc123def456
 Content-Type: application/json
 Accept: application/json
 
 {
-  "referenceNo": "REQ20251103-001", ???
-  "accessToken": "abc123def456", ???
+  "referenceNo": "REQ20251103-001",
+  "accessToken": "abc123def456",
   "emailAddress": "john.doe@example.com",
   "lang": "EN",
   "islamicMode": "0"
@@ -253,7 +247,7 @@ Accept: application/json
   "errorCode": "0",
   "responseCode": "200",
   "responseMessage": "OK",
-  "newToken": "newAbc123Token",     ???
+  "newToken": "newAbc123Token",
   "pk_id": "1234567890",
   "resData": {
     "validationStatus": "EXISTS",
@@ -283,7 +277,7 @@ Accept: application/json
 | **Failure Responses** | - `400 Bad Request` – `Invalid Request Parameters`.<br>- `401 Unauthorized` – `Invalid Token`.<br>- `503 Service Unavailable` – `Backend Service Unavailable`.<br>- `500 Internal Server Error` – generic failure. |
 | **Validation Errors** | Return a JSON object containing `validationError` fields (e.g., `field: "emailAddress", message: "must not be empty"`). |
 | **Example Successful Request** | ```json { "emailAddress": "john.doe@example.com", "lang": "EN", "islamicMode": "0" }``` |
-| **Example Successful Response** | ```json { "responseCode": "200", "responseMessage": "OK", "referenceNo": "REQ20251103-001", "newToken": "newAbc123Token", "pk_id": "1234567890", "resData": { "validationStatus": "EXISTS" } }``` |
+| **Example Successful Response** | ```json { "responseCode": "200", "responseMessage": "OK", "referenceNo": "REQ20251103-001", "newToken": "newAbc123Token", "pk_id": "1234567890", "resData": { "validationStatus": "EXISTS" } }```
 
 
 </details>
@@ -301,7 +295,7 @@ Accept: application/json
 | `accessToken` | **String** | Yes | Non‑empty; must be a valid bearer token format | Authentication token for the external API. |
 | `islamicMode` | **String** | No | – | Mode flag (e.g., `true`/`false`). |
 | `lang` | **String** | No | – | Language preference. |
-| `ppNumber` | **String** | No | – | Passport number (optional). |
+| `ppNumber` | **String** | No | – | Passport number (optional). 
 
 
 
@@ -315,7 +309,7 @@ Authorization: Bearer <accessToken>
 
 {
   "referenceNo": "AB123456",
-  "accessToken": "<accessToken>",   ???
+  "accessToken": "<accessToken>",
   "islamicMode": "false",
   "lang": "en",
   "ppNumber": "12345"
@@ -369,7 +363,7 @@ Authorization: Bearer <accessToken>
 | **Validation Errors (400)** | Return a JSON map of field → error message (e.g., `{ "referenceNo": "must not be empty" }`). |
 | **HTTP Status Codes** | `200` – always returned (business status encoded inside payload).<br>`400` – when client‑side validation fails.<br>`500` – should never be used; all errors are wrapped in payload with `status=Error`. |
 | **Content-Type** | `application/json` |
-| **Authentication** | Bearer token (`Authorization: Bearer <token>`) – validated by a Spring Security filter before reaching the controller. |
+| **Authentication** | Bearer token (`Authorization: Bearer <token>`) – validated by a Spring Security filter before reaching the controller. 
 
 
 </details>

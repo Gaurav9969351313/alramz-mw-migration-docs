@@ -1,9 +1,3 @@
----
-layout: default
-title: ADR-1: Secret Management
-permalink: /adr/ADR_1_Secret_Management.html
----
-
 # ADR-1: Secret Management
 
 ## What is it?

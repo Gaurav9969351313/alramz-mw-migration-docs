@@ -1,15 +1,9 @@
----
-layout: default
-title: validateIBAN - SRS
-permalink: /drafts/draft_validateIban.html
----
-
 # SRS - validateIBAN
 
 **Package:** IBAN  
 **Service:** validateIBAN  
 **Prompt Version:** prompt_v2  
-**Timestamp:** 2026-08-07 09:49:30  
+**Timestamp:** 2026-08-07 09:49:30
 
 ## Service Metadata
 

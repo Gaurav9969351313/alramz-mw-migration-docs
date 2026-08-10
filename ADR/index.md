@@ -1,16 +1,10 @@
----
-layout: default
-title: Architecture Decision Records
-permalink: /adr/
----
-
 # Architecture Decision Records
 
 This section contains Architecture Decision Records (ADRs) that document significant design and architectural decisions made during the Software AG to Spring Boot migration.
 
 ## Records
 
-- [ADR-1: Secret Management]({{ '/adr/ADR_1_Secret_Management.html' | relative_url }})
+- [ADR-1: Secret Management](ADR_1_Secret_Management.md)
 
 ## What is an ADR?
 
