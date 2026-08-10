@@ -118,7 +118,7 @@ Return 200 / OK
 | **INT-005**    | `DFMIntegrations.v2.adapters:insertDFMOnboardingRequest`    | Persist the validated onboarding request into DFM onboarding system.    | Complete onboarding request payload.<br>`ACCOUNT_STATUS = NEW`             | `insertionResult`      | Persistence successful.                   | Return `400 + lastError` or `500 + Internal Server Error` depending on exception path. |
 
 <details>
-<summary>## eTradeFIT.v2.services.InternalOnboarding:IfEIDExists </summary>
+<summary>eTradeFIT.v2.services.InternalOnboarding:IfEIDExists</summary>
 
 ## Validation Rules  
 
@@ -210,7 +210,7 @@ Content-Type: application/json
 ---
 
 <details>
-<summary>## eTradeFIT.v2.services.InternalOnboarding:IfEmailExists</summary>
+<summary>eTradeFIT.v2.services.InternalOnboarding:IfEmailExists</summary>
 
 
 ## Validation Rules  
@@ -291,7 +291,7 @@ Accept: application/json
 ---
 
 <details>
-<summary>## eTradeFIT.v2.services.InternalOnboarding:IfPassportExists</summary>
+<summary>eTradeFIT.v2.services.InternalOnboarding:IfPassportExists</summary>
 
 ## Validation Rules
 

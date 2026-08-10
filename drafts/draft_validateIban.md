@@ -51,13 +51,13 @@ https://api.iban.com/clients/api/v4/iban/
 
 **External API Request Details**
 
-** External API Call*
+**External API Call**
 
 ```http
 GET https://api.iban.com/clients/api/v4/iban/?iban=LY29010012000012152920001&format=json&api_key=ed02a1c10b60c56b87d25f1ad9518388
 ```
 
-**External Sample 200 Response***
+**External Sample 200 Response**
 ```json
 {
   "bankData": {
@@ -118,7 +118,7 @@ GET https://api.iban.com/clients/api/v4/iban/?iban=LY29010012000012152920001&for
 ```
 
 
-# REST API Design Should be used in migration
+## REST API Design for Migration
 
 ## API Details
 
