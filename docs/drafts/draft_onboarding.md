@@ -207,29 +207,29 @@ Return 200 / OK
     ## Oracle SQL Logic to check for ifNINOrTradingNumberExist
 
     ```sql
-    SELECT
-        CASE
-            WHEN EXISTS (
-                SELECT 1
-                FROM BV_PAR_CL_NIN_DET
-                WHERE UPPER(EXCHANGE_ID) = UPPER(:exchange)
-                AND UPPER(NIN) = UPPER(:nin)
-            )
-            THEN 1
-            ELSE 0
-        END AS NIN_EXISTS,
+        SELECT
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM BV_PAR_CL_NIN_DET
+                    WHERE UPPER(EXCHANGE_ID) = UPPER(:exchange)
+                    AND UPPER(NIN) = UPPER(:nin)
+                )
+                THEN 1
+                ELSE 0
+            END AS NIN_EXISTS,
 
-        CASE
-            WHEN EXISTS (
-                SELECT 1
-                FROM BV_PAR_CL_NIN_DET
-                WHERE UPPER(EXCHANGE_ID) = UPPER(:exchange)
-                AND UPPER(C_ACCOUNT) LIKE UPPER(:trading_number)
-            )
-            THEN 1
-            ELSE 0
-        END AS TRADING_NUMBER_EXISTS
-    FROM DUAL;
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM BV_PAR_CL_NIN_DET
+                    WHERE UPPER(EXCHANGE_ID) = UPPER(:exchange)
+                    AND UPPER(C_ACCOUNT) LIKE UPPER(:trading_number)
+                )
+                THEN 1
+                ELSE 0
+            END AS TRADING_NUMBER_EXISTS
+        FROM DUAL;
    ```
 ---
 
