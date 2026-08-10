@@ -2,7 +2,6 @@ site_name: Integration Documentation
 site_url: https://Gaurav9969351313.github.io/alramz-mw-migration-docs
 site_description: Software AG to Spring Boot Migration Documentation
 site_author: Al Ramz
-docs_dir: .
 
 theme:
   name: material
