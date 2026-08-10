@@ -111,6 +111,7 @@ Return 200 / OK
 | **INT-004**    | `eTradeFIT.v2.services.InternalOnboarding:IfPassportExists` | Check whether the supplied passport number already exists.              | `ppNumber ← pp_no`<br>`correlationID ← generated GUID`                     | `exists → ppExists`    | Duplicate status determined successfully. | If service is unavailable, return technical error and stop processing.                 |
 | **INT-005**    | `DFMIntegrations.v2.adapters:insertDFMOnboardingRequest`    | Persist the validated onboarding request into DFM onboarding system.    | Complete onboarding request payload.<br>`ACCOUNT_STATUS = NEW`             | `insertionResult`      | Persistence successful.                   | Return `400 + lastError` or `500 + Internal Server Error` depending on exception path. |
 
+
 ??? "eTradeFIT.v2.services.InternalOnboarding:IfEIDExists"
 
     ## Validation Rules  
@@ -200,6 +201,36 @@ Return 200 / OK
     
     
 
+---
+
+??? "FITIntegrations.adapters:ifNINOrTradingNumberExist"
+   ### Oracle SQL Query 
+
+   ```sql
+    SELECT
+        CASE
+            WHEN EXISTS (
+                SELECT 1
+                FROM BV_PAR_CL_NIN_DET
+                WHERE UPPER(EXCHANGE_ID) = UPPER(:exchange)
+                AND UPPER(NIN) = UPPER(:nin)
+            )
+            THEN 1
+            ELSE 0
+        END AS NIN_EXISTS,
+
+        CASE
+            WHEN EXISTS (
+                SELECT 1
+                FROM BV_PAR_CL_NIN_DET
+                WHERE UPPER(EXCHANGE_ID) = UPPER(:exchange)
+                AND UPPER(C_ACCOUNT) LIKE UPPER(:trading_number)
+            )
+            THEN 1
+            ELSE 0
+        END AS TRADING_NUMBER_EXISTS
+    FROM DUAL;
+   ```
 ---
 
 ??? "eTradeFIT.v2.services.InternalOnboarding:IfEmailExists"
@@ -364,6 +395,193 @@ Return 200 / OK
     
     
 
+---
+
+??? "DFMIntegrations.v2.adapters:insertDFMOnboardingRequest" 
+    | Property             | Value                                   |
+    | -------------------- | --------------------------------------- |
+    | **Service type**     | `AdapterService`                        |
+    | **Adapter type**     | `JDBC`                                  |
+    | **Adapter template** | `Insert`                                |
+    | **Adapter service**  | `com.wm.adapter.wmjdbc.services.Insert` |
+    | **Table**            | `DFM_ONBOARDING_REQUESTS`               |
+    | **Operation**        | `INSERT`                                |
+    | **Connection**       | `MiddlewareConnection:Middleware`       |
+    | **Input record**     | `insertDFMOnboardingRequestInput`       |
+    | **Output**           | `result`                                |
+
+
+    ```sql 
+    INSERT INTO DFM_ONBOARDING_REQUESTS (
+        ID,
+        REQUEST_ID,
+        MOBILE_NUMBER,
+        EMAIL_ADDRESS,
+        NIN,
+        EID_DATE_OF_BIRTH,
+        EID_EXPIRY_DATE,
+        EID_FULL_NAME,
+        EID_NUMBER,
+        EID_ISSUE_DATE,
+        EID_PRIMARY_ID,
+        EID_SECONDARY_ID,
+        EID_GENDER,
+        EID_RESIDENCY_EXPIRY_DATE,
+        EID_RESIDENCY_NUMBER,
+        EID_FAMILY_ID,
+        EID_NATIONALITY,
+        EID_FULL_NAME_ARABIC,
+        EID_ATTACHMENT_FRONT,
+        EID_ATTACHMENT_BACK,
+        EID_ATTACHMENT_TYPE,
+        PP_DATE_OF_BIRTH,
+        PP_EXPIRY_DATE,
+        PP_FULL_NAME,
+        PP_NUMBER,
+        PP_NATIONALITY,
+        PP_PRIMARY_ID,
+        PP_SECONDARY_ID,
+        PP_GENDER,
+        PP_ATTACHMENT,
+        PP_ATTACHMENT_TYPE,
+        ADDRESS,
+        CITY_NAME,
+        MOTHER_NAME,
+        POBOX,
+        PHONE,
+        COUNTRY,
+        SIGNATURE_ATTACHMENT,
+        SIGNATURE_ATTACHMENT_TYPE,
+        PAYMENT_METHOD,
+        PAYMENT_AED_IBAN,
+        PAYMENT_USD_IBAN,
+        PAYMENT_FRN_IBAN,
+        PAYMENT_FRN_SWIFT,
+        PAYMENT_COR_IBAN,
+        PAYMENT_COR_SWIFT,
+        PAYMENT_ROUTE_CODE,
+        PORTFOLIO_OPTIONS,
+        EMPLOYMENT_STATUS,
+        EMPLOYER_NAME,
+        EMPLOYMENT_POSITION,
+        EMPLOYER_MARKET_OR_ISSUER,
+        EMPLOYER_MARKET_OR_ISSUER_COMPANIES,
+        RELATED_TO_MARKET_EMPLOYEE,
+        RELATED_TO_MARKET_EMPLOYEE_RELATIVES_JSON,
+        SOURCE_OF_INCOME,
+        ANNUAL_INCOME_RANGE,
+        INVESTMENT_KNOWLEDGE_EXTENT,
+        INVESTMENT_STRATEGY,
+        INVESTMENT_KNOWLEDGE_INSTRUMENTS,
+        INVESTMENT_RISK_TOLERANCE,
+        INVESTMENT_AMOUNT,
+        INVESTMENT_KNOWLEDGE_IN_TRADING,
+        INVESTMENT_KNOWLEDGE_SOURCE,
+        EDUCATION_LEVEL,
+        INVESTMENT_PREVIOUS_KNOWLEDGE,
+        INVESTMENT_FREQUENCY,
+        INVESTMENT_HIGH_RISK_AWARENESS,
+        INVESTMENT_NET_EQUITY,
+        ACCREDITED_BY_AUTHORITY,
+        ACCREDITED_BY_AUTHORITY_LIST,
+        ACCREDITED_BY_AUTHORITY_TYPE,
+        QUALIFIED_INVESTOR,
+        CSR_JSON,
+        FATCA_US_CITIZEN,
+        FATCA_TIN,
+        BACKGROUND_CHECK,
+        BACKGROUND_CHECK_JSON,
+        MARGIN_TRADING_NUMBER,
+        MEMBER_REFERENCE_NUMBER,
+        ACCOUNT_STATUS
+    )
+    VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+    );
+    ```
 ---
 
 ### Sample DFM Persistence Request
