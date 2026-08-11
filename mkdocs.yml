@@ -50,6 +50,8 @@ nav:
     - drafts/index.md
     - 'DFM Onboarding - SRS': drafts/draft_onboarding.md
     - 'validateIBAN - SRS': drafts/draft_validateIban.md
+    - 'VeriPhone - SRS': drafts/draft_veriphone.md
+    - 'EmailGateway getAuthToken - SRS': drafts/draft_emailgateway_getAuthToken.md
 
 plugins:
   - search
