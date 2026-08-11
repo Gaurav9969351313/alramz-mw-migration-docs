@@ -14,6 +14,7 @@
 The **Verify** service is a **phone number verification endpoint** that accepts a phone number, validates it against a known format, and optionally invokes an external VeriPhone verification API when running in the **PROD environment**. The service provides a unified interface for verifying mobile phone numbers by combining internal validation with an external verification service. The flow processes the incoming request through a series of validation, transformation, and external integration steps, returning a structured response that includes the verification status, phone details, and metadata.
 
 ## 2. Business Rules
+
 | ID         | Requirement / Business Rule              | Type                         | Condition / Validation                                                                 | Expected Action / Outcome                                                                |
 | ---------- | ---------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | **BR-001** | **Phone Number Required**                | Mandatory / Input Validation | `phone` is missing, `null`, or empty                                                   | Return **HTTP 400** with `{"error": "Phone number is required"}`                         |
@@ -25,7 +26,6 @@ The **Verify** service is a **phone number verification endpoint** that accepts 
 | **BR-007** | **VeriPhone API Configuration**          | Configuration                | `VERIPHONE_BASE_URL` and `VERIPHONE_API_KEY` are available                             | Use `VERIPHONE_BASE_URL` as the endpoint and `VERIPHONE_API_KEY` for authentication      |
 | **BR-008** | **VeriPhone API Invocation Restriction** | Business Rule                | Environment is **not PROD** OR `VERIPHONE_API_CALL_ENABLED != true`                    | **Do not invoke** the VeriPhone API                                                      |
 
-
 ## 3. Spring Boot API Design
 
 ### API Details
@@ -35,8 +35,7 @@ The **Verify** service is a **phone number verification endpoint** that accepts 
 | **Endpoint** | `POST /api/v1/verify` |
 | **Content-Type** | `application/json` |
 
-
-## 4. Sample POST Request:**
+## 4. Sample POST Request
 
 ```http
 POST /api/v1/verify HTTP/1.1
@@ -45,22 +44,21 @@ Content-Type: application/json
 Authorization: Bearer <token>
 
 {
-  "phone": "+971501234567",
+  "phone": "+971501234567"
 }
 ```
 
-## 4. Sample External Request
+## 5. Sample External Request
 
 ```http
-postman request POST 'https://api.veriphone.io/v2/verify?key=VERIPHONE_API_KEY&phone=971502540238' \
-  --header 'Content-Type: application/json' \
-  --body ''
+POST https://api.veriphone.io/v2/verify?key=VERIPHONE_API_KEY&phone=971502540238
+Content-Type: application/json
 
 ```
 
-## 5. Sample External Response
+## 6. Sample External Response
 
-#### Successful Response from VeriPhone API
+### Successful Response from VeriPhone API
 
 ```json
 {
@@ -81,7 +79,7 @@ postman request POST 'https://api.veriphone.io/v2/verify?key=VERIPHONE_API_KEY&p
 }
 ```
 
-#### Error Response (Invalid Phone)
+### Error Response (Invalid Phone)
 
 ```json
 {
@@ -94,7 +92,7 @@ postman request POST 'https://api.veriphone.io/v2/verify?key=VERIPHONE_API_KEY&p
 }
 ```
 
-## 6 Sample Response 
+## 7. Sample Response
 
 ```json
 {
