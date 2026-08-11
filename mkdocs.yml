@@ -43,7 +43,9 @@ nav:
   - Home: index.md
   - ADRs:
     - ADR/index.md
+    - 'ADR-0: Requirements': ADR/ADR_0_Requirements.md
     - 'ADR-1: Secret Management': ADR/ADR_1_Secret_Management.md
+    - 'ADR-2: Azure Compute (Draft)': ADR/ADR_2_Azure_Compute.md
   - Drafts:
     - drafts/index.md
     - 'DFM Onboarding - SRS': drafts/draft_onboarding.md

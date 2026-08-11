@@ -4,7 +4,9 @@ This section contains Architecture Decision Records (ADRs) that document signifi
 
 ## Records
 
+- [ADR-0: Requirements](ADR_0_Requirements.md)
 - [ADR-1: Secret Management](ADR_1_Secret_Management.md)
+- [ADR-2: Azure Compute (Draft)](ADR_2_Azure_Compute.md)
 
 ## What is an ADR?
 
